@@ -42,7 +42,8 @@ node_modules/
 jspm_packages/
 
 #hide firebase config
-./Firebase/*
+./Firebase/firebase.config.js
+./Firebase/firebase.initialize.js
 
 # TypeScript v1 declaration files
 typings/
