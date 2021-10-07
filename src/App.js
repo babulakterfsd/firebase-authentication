@@ -9,6 +9,8 @@ import {
   signInWithEmailAndPassword,
   sendEmailVerification,
   sendPasswordResetEmail,
+  updateProfile,
+  FacebookAuthProvider,
 } from "firebase/auth";
 import initializeAuthentication from "./Firebase/firebase.initialize";
 import { Container, Row, Button, Col, Card, Form } from "react-bootstrap";
@@ -18,10 +20,12 @@ initializeAuthentication();
 
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
+const facebookProvider = new FacebookAuthProvider();
 const auth = getAuth();
 
 function App() {
   const [user, setUser] = useState({});
+  const [name, setName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userPassword, setUserPassword] = useState("");
   const [error, setError] = useState("");
@@ -38,6 +42,14 @@ function App() {
         setUser(loggedInUser);
       })
       .catch((error) => alert(error.message));
+  };
+  //facebook signin button
+  const handleFacebookSignIn = () => {
+    signInWithPopup(auth, facebookProvider).then((result) => {
+      const { displayName: name, email, photoURL: photo } = result.user;
+      const loggedInUser = { name, email, photo };
+      setUser(loggedInUser);
+    });
   };
 
   //github signin button
@@ -69,6 +81,7 @@ function App() {
     signInWithEmailAndPassword(auth, email, password)
       .then((result) => {
         const user = result.user;
+        console.log(user);
         setResponse("Login Successful");
       })
       .catch((error) => {
@@ -86,7 +99,9 @@ function App() {
       createUserWithEmailAndPassword(auth, email, password)
         .then((result) => {
           const user = result.user;
+          console.log(user);
           setResponse("Registration Successful");
+          updateUser();
           verifyEmail();
         })
         .catch((error) => {
@@ -117,6 +132,17 @@ function App() {
   const handleEmail = (event) => {
     setUserEmail(event.target.value);
   };
+  //handle Name
+  const handleName = (event) => {
+    setName(event.target.value);
+    console.log(event.target.value);
+  };
+  //update user info
+  const updateUser = () => {
+    updateProfile(auth.currentUser, {
+      displayName: name,
+    });
+  };
 
   // passwordRulesDisplayer
   const passwordRulesDisplayer = () => {
@@ -130,16 +156,31 @@ function App() {
 
   return (
     <div className="App">
-      {/* Form */}
       <Container>
         <Row>
           <div className="col-12 col-md-8 col-lg-6 mx-auto">
-            <Form className="mt-5 shadow-sm p-5" onSubmit={handleSubmit}>
+            <Form
+              className="mt-2 shadow-sm pt-3 pb-5 px-5"
+              onSubmit={handleSubmit}
+            >
               <h5 className="text-secondary mb-3">
                 {" "}
                 <i className="fas fa-user-tie text-success"></i> Please
                 {!isRegistered ? " Resgister !" : " LogIn !"}
               </h5>
+              {!isRegistered ? (
+                <Form.Group className="mb-3" controlId="name">
+                  <Form.Label>Your Name</Form.Label>
+                  <Form.Control
+                    onBlur={handleName}
+                    type="text"
+                    placeholder="Enter Your Name"
+                    required
+                  />
+                </Form.Group>
+              ) : (
+                <span></span>
+              )}
               <Form.Group className="mb-3" controlId="email">
                 <Form.Label>Email address</Form.Label>
                 <Form.Control
@@ -227,6 +268,13 @@ function App() {
                   SignIn with Google
                 </Button>
                 <Button
+                  className="btn-success fw-semi-bold  me-1"
+                  onClick={handleFacebookSignIn}
+                >
+                  <i className="fab fa-facebook me-2 text-warning"></i>
+                  SignIn with Facebook
+                </Button>
+                <Button
                   className="btn-success fw-semi-bold"
                   onClick={handleGithubSignIn}
                 >
@@ -239,8 +287,8 @@ function App() {
             <Col className="col-12 col-md-8 col-lg-4 mx-auto">
               <Card className="text-center pt-2 mt-5">
                 <Card.Title>
-                  {user.email ? "Welcome to Google, " : "Welcome to Github, "}{" "}
-                  <span className="text-success">{user.name}</span>{" "}
+                  Welcome
+                  <span className="text-success">{` ${user.name}`}</span>{" "}
                 </Card.Title>
                 <Card.Img
                   variant="top"
