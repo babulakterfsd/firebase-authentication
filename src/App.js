@@ -32,32 +32,51 @@ function App() {
   let [passwordRulesShow, setPasswordRulesShow] = useState(false);
   let [response, setResponse] = useState("");
   let [isRegistered, setIsRegistered] = useState(false);
+  const [siteName, setSiteName] = useState("");
 
   //google signin button
   const handleGoogleSignIn = () => {
     signInWithPopup(auth, googleProvider)
       .then((result) => {
-        const { displayName: name, email, photoURL: photo } = result.user;
+        const {
+          displayName: name,
+          email,
+          photoURL: photo,
+          providerData,
+        } = result.user;
         const loggedInUser = { name, email, photo };
         setUser(loggedInUser);
+        setSiteName(detectSiteName(providerData[0].providerId));
       })
       .catch((error) => alert(error.message));
   };
   //facebook signin button
   const handleFacebookSignIn = () => {
     signInWithPopup(auth, facebookProvider).then((result) => {
-      const { displayName: name, email, photoURL: photo } = result.user;
+      const {
+        displayName: name,
+        email,
+        photoURL: photo,
+        providerData,
+      } = result.user;
       const loggedInUser = { name, email, photo };
       setUser(loggedInUser);
+      setSiteName(detectSiteName(providerData[0].providerId));
     });
   };
 
   //github signin button
   const handleGithubSignIn = () => {
     signInWithPopup(auth, githubProvider).then((result) => {
-      const { displayName: name, email, photoURL: photo } = result.user;
+      const {
+        displayName: name,
+        email,
+        photoURL: photo,
+        providerData,
+      } = result.user;
       const loggedInUser = { name, email, photo };
       setUser(loggedInUser);
+      setSiteName(detectSiteName(providerData[0].providerId));
     });
   };
 
@@ -152,6 +171,19 @@ function App() {
   //ToggleForm
   const toggleForm = (event) => {
     setIsRegistered(event.target.checked);
+  };
+
+  //detect sitename
+  const detectSiteName = (siteName) => {
+    let site = siteName;
+    if (siteName === "facebook.com") {
+      site = "facebook";
+    } else if (siteName === "google.com") {
+      site = "google";
+    } else if (siteName === "github.com") {
+      site = "github";
+    }
+    return site;
   };
 
   return (
@@ -287,7 +319,7 @@ function App() {
             <Col className="col-12 col-md-8 col-lg-4 mx-auto">
               <Card className="text-center pt-2 mt-5">
                 <Card.Title>
-                  Welcome
+                  Welcome to {`${siteName}, `}
                   <span className="text-success">{` ${user.name}`}</span>{" "}
                 </Card.Title>
                 <Card.Img
